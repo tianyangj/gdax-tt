@@ -10,16 +10,16 @@ function logError(err: any): void {
 
 console.log(product);
 
-// console.log(`GDAXExchangeAPI.apiURL`, gdax.apiURL);
+// console.log(`GDAXExchangeAPI.apiURL\n`, gdax.apiURL);
 
 // gdax.loadProducts().then(products => {
-//     console.log(`GDAXExchangeAPI.loadProducts()`, products.map(product => product.id));
+//     console.log(`GDAXExchangeAPI.loadProducts()\n`, products.map(product => product.id));
 // }).catch(logError);
 
 // gdax.loadMidMarketPrice(product).then(price => {
-//     console.log(`GDAXExchangeAPI.loadMidMarketPrice(${product})`, price);
+//     console.log(`GDAXExchangeAPI.loadMidMarketPrice(${product})\n`, price);
 // }).catch(logError);
 
-gdax.loadOrderbook(product).then(book => {
-    console.log('book', book);
-}).catch(logError);
+// gdax.loadTicker(product).then(ticker => {
+//     console.log(`GDAXExchangeAPI.loadTicker(${product})\n`, ticker);
+// }).catch(logError);

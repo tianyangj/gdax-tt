@@ -136,13 +136,13 @@ export class GDAXExchangeAPI implements PublicExchangeAPI, AuthenticatedExchange
         return this.loadFullOrderbook(product);
     }
 
-    private loadFullOrderbook(product: string): Promise<BookBuilder> {
+    loadFullOrderbook(product: string): Promise<BookBuilder> {
         return this.loadGDAXOrderbook({ product: product, level: 3 }).then((body) => {
             return this.buildBook(body);
         });
     }
 
-    private loadGDAXOrderbook(options: OrderbookEndpointParams): Promise<any> {
+    loadGDAXOrderbook(options: OrderbookEndpointParams): Promise<any> {
         const url = `${this.apiURL}/products/${options.product}/book`;
         return request.get(url)
             .accept('application/json')
