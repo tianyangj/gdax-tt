@@ -1,0 +1,60 @@
+{
+  "type": "ticker",
+  "time": null,
+  "productId": "ETH-USD",
+  "sequence": 1210139179,
+  "price": "290.13",
+  "bid": "290.12",
+  "ask": "290.13",
+  "trade_id": "undefined",
+  "size": "NaN",
+  "sourceSequence": 1210139179
+}
+{
+  "type": "ticker",
+  "time": "2017-09-27T06:56:16.985Z",
+  "productId": "ETH-USD",
+  "sequence": 1210139537,
+  "price": "290.12",
+  "bid": "290.12",
+  "ask": "290.13",
+  "trade_id": "11332183",
+  "size": "3.2568",
+  "sourceSequence": 1210139537
+}
+{
+  "type": "ticker",
+  "time": "2017-09-27T06:56:47.971Z",
+  "productId": "ETH-USD",
+  "sequence": 1210140174,
+  "price": "290.13",
+  "bid": "290.12",
+  "ask": "290.13",
+  "trade_id": "11332184",
+  "size": "1.981",
+  "sourceSequence": 1210140174
+}
+{
+  "type": "ticker",
+  "time": "2017-09-27T06:57:01.674Z",
+  "productId": "ETH-USD",
+  "sequence": 1210140495,
+  "price": "290.13",
+  "bid": "290.12",
+  "ask": "290.13",
+  "trade_id": "11332185",
+  "size": "0.00003436",
+  "sourceSequence": 1210140495
+}
+{
+  "type": "ticker",
+  "time": "2017-09-27T06:57:18.974Z",
+  "productId": "ETH-USD",
+  "sequence": 1210140844,
+  "price": "290.13",
+  "bid": "290.12",
+  "ask": "290.13",
+  "trade_id": "11332186",
+  "size": "8.6089",
+  "sourceSequence": 1210140844
+}

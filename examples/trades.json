@@ -1,0 +1,170 @@
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:16.907Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332068,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "0.30360000",
+  "sourceSequence": 1210110207
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:36.472Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332069,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "0.00344282",
+  "sourceSequence": 1210111235
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332070,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "1.02081949",
+  "sourceSequence": 1210111273
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332071,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "0.45829322",
+  "sourceSequence": 1210111275
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332072,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "0.01000000",
+  "sourceSequence": 1210111277
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332073,
+  "side": "buy",
+  "price": "289.59000000",
+  "size": "0.01000000",
+  "sourceSequence": 1210111279
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332074,
+  "side": "buy",
+  "price": "289.60000000",
+  "size": "0.03366222",
+  "sourceSequence": 1210111281
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332075,
+  "side": "buy",
+  "price": "289.60000000",
+  "size": "0.01000000",
+  "sourceSequence": 1210111283
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.221Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332076,
+  "side": "buy",
+  "price": "289.67000000",
+  "size": "0.09409250",
+  "sourceSequence": 1210111285
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332077,
+  "side": "buy",
+  "price": "289.94000000",
+  "size": "0.01548900",
+  "sourceSequence": 1210111432
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332078,
+  "side": "buy",
+  "price": "289.95000000",
+  "size": "0.01549500",
+  "sourceSequence": 1210111434
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332079,
+  "side": "buy",
+  "price": "289.96000000",
+  "size": "0.06376300",
+  "sourceSequence": 1210111436
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332080,
+  "side": "buy",
+  "price": "289.96000000",
+  "size": "0.50000000",
+  "sourceSequence": 1210111438
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332081,
+  "side": "buy",
+  "price": "289.97000000",
+  "size": "0.03964300",
+  "sourceSequence": 1210111440
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332082,
+  "side": "buy",
+  "price": "289.98000000",
+  "size": "0.01893900",
+  "sourceSequence": 1210111442
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:37.868Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332083,
+  "side": "buy",
+  "price": "289.98000000",
+  "size": "3.49778056",
+  "sourceSequence": 1210111444
+}
+{
+  "type": "trade",
+  "time": "2017-09-27T06:42:47.657Z",
+  "productId": "ETH-USD",
+  "tradeId": 11332084,
+  "side": "sell",
+  "price": "289.94000000",
+  "size": "4.71280000",
+  "sourceSequence": 1210112363
+}
