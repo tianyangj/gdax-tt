@@ -1,4 +1,5 @@
-let data = window.data;
+const data = window.data;
+const WARNING = 10000;
 
 let total = 0;
 let time = new Date(data[0].time).getTime();
@@ -38,12 +39,19 @@ const result = data.map(trade => {
       node.sell++;
       node.sellVolume += cur.amount;
     }
-    node.netVolumn = node.buyVolume - node.sellVolume;
+    if (Math.abs(node.netVolume) > WARNING) {
+      node.warning = true;
+    }
+    node.endPrice = cur.price;
+    node.netVolume = node.buyVolume - node.sellVolume;
     node.trades.push(cur);
   } else {
     let node = {
       id: getDateTimeId(currentYear, currentMonth, currentDate, currentHour, currentMinute),
-      netVolumn: 0,
+      warning: undefined,
+      netVolume: 0,
+      startPrice: cur.price,
+      endPrice: cur.price,
       buy: 0,
       buyVolume: 0,
       sell: 0,
@@ -57,7 +65,7 @@ const result = data.map(trade => {
       node.sell = 1;
       node.sellVolume = cur.amount;
     }
-    node.netVolumn = node.buyVolume - node.sellVolume;
+    node.netVolume = node.buyVolume - node.sellVolume;
     acc.push(node);
   }
   return acc;
