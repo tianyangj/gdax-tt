@@ -30,12 +30,12 @@ GTT.Factories.GDAX.FeedFactory(logger, products).then((feed: GDAXFeed) => {
         // if (msg.type === 'snapshot') {
         //     writeSnapshot(msg);
         // }
-        // if (msg.type === 'trade') {
-        //     writeTrades(msg);
-        // }
-        // if (msg.type === 'ticker') {
-        //     writeTickers(msg);
-        // }
+        if (msg.type === 'trade') {
+            jsonfile.writeFile('./trades.json', msg, { spaces: 2, flag: 'a' }, () => { });
+        }
+        if (msg.type === 'ticker') {
+            jsonfile.writeFile('./tickers.json', msg, { spaces: 2, flag: 'a' }, () => { });
+        }
         // if (msg.type === 'level') {
         //     writeUpdates(msg);
         // }
