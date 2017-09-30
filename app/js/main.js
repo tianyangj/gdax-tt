@@ -3,114 +3,116 @@ const TOKEN_SIZE = 10;
 const QUEUE_SIZE = 10;
 
 let total = 0;
-let time = new Date(data[0].time).getTime();
 let queue = [];
-const result = data.map(trade => {
-  const {
-    type,
-    productId,
-    tradeId,
-    sourceSequence,
-    ...subset
-  } = trade;
-  const amount = Number(trade.price) * Number(trade.size);
-  if (trade.side === 'buy') {
-    total += amount;
-  } else if (trade.side === 'sell') {
-    total -= amount;
-  }
+const result = data
+  .map(normalizeData)
+  .reduce(groupBySecond, [])
+  .map(trade => {
+    return {
+      ...trade,
+      //warning: Math.abs(trade.netSize) >= TOKEN_SIZE ? true : undefined,
+    };
+  });
+
+function normalizeData(trade) {
   return {
-    ...subset,
+    time: trade.time,
+    side: trade.side,
     price: Number(trade.price),
     size: Number(trade.size),
-    amount: amount,
-    x: (new Date(trade.time).getTime() - time) / 1000,
-    y: total
+    amount: Number(trade.price) * Number(trade.size)
   };
-}).reduce((acc, cur) => {
-  let currentTime = new Date(cur.time);
-  let node = acc.find(x => x.id === getDateTimeId(currentTime));
-  if (node) {
-    if (cur.side === 'buy') {
-      node.buy++;
-      node.buySize += cur.size;
-    } else if (cur.side === 'sell') {
-      node.sell++;
-      node.sellSize += cur.size;
+}
+
+function groupBySecond(groups, trade) {
+  const tradeTime = new Date(trade.time);
+  let group = groups.find(g => g.id === getDateTimeId(trade.time));
+  if (group) {
+    if (trade.side === 'buy') {
+      group.buyTotal++;
+      group.buySize += trade.size;
+    } else if (trade.side === 'sell') {
+      group.sellTotal++;
+      group.sellSize += trade.size;
     }
-    node.endPrice = cur.price;
-    node.netSize = node.buySize - node.sellSize;
-    node.trades.push(cur);
+    group.netSize = group.buySize - group.sellSize;
+    group.endPrice = trade.price;
+    group.trades.push(trade);
   } else {
-    let node = {
-      id: getDateTimeId(currentTime),
+    group = {
+      id: getDateTimeId(trade.time),
       warning: undefined,
       zScore: 0,
-      weight: 0,
       netSize: 0,
-      startPrice: cur.price,
-      endPrice: cur.price,
-      buy: 0,
+      startPrice: trade.price,
+      endPrice: trade.price,
+      buyTotal: 0,
       buySize: 0,
-      sell: 0,
+      sellTotal: 0,
       sellSize: 0,
-      trades: [cur]
+      trades: [trade]
     };
-    if (cur.side === 'buy') {
-      node.buy = 1;
-      node.buySize = cur.size;
-    } else if (cur.side === 'sell') {
-      node.sell = 1;
-      node.sellSize = cur.size;
+    if (trade.side === 'buy') {
+      group.buyTotal++;
+      group.buySize += trade.size;
+    } else if (trade.side === 'sell') {
+      group.sellTotal++;
+      group.sellSize += trade.size;
     }
-    node.netSize = node.buySize - node.sellSize;
-    acc.push(node);
+    group.netSize = group.buySize - group.sellSize;
+    groups.push(group);
   }
-  return acc;
-}, []).map(trade => {
-  return {
-    ...trade,
-    //warning: Math.abs(trade.netSize) >= TOKEN_SIZE ? true : undefined,
-    //weight: getQueueSum(trade.netSize)
-  };
-});
+  return groups;
+}
 
-let netSizes = result.map(r => r.netSize);
-let q1 = ss.quantile(netSizes, 0.25);
-let q3 = ss.quantile(netSizes, 0.75);
-let iqr = ss.interquartileRange(netSizes);
-let mean = ss.mean(netSizes);
-let sd = ss.standardDeviation(netSizes);
-console.log(q1, q3, iqr, mean, sd);
-let K = 1.5;
-let lower = q1 - iqr * K;
-let lower2 = q1 - iqr * K * 2;
-let higher = q3 + iqr * K;
-let higher2 = q3 + iqr * K * 2;
-console.log(lower2, lower, higher, higher2);
-
-result.forEach(trade => {
-  if (trade.netSize <= lower2) {
-    trade.warning = 'SELL SELL';
-  } else if (trade.netSize > lower2 && trade.netSize <= lower) {
-    trade.warning = 'SELL';
-  } else if (trade.netSize >= higher && trade.netSize < higher2) {
-    trade.warning = 'BUY';
-  } else if (trade.netSize >= higher2) {
-    trade.warning = 'BUY BUY';
-  }
-  trade.zScore = ss.zScore(trade.netSize, mean, sd);
-});
-
-function getDateTimeId(datetime) {
-  let year = datetime.getUTCFullYear();
-  let month = datetime.getUTCMonth() + 1;
-  let date = datetime.getUTCDate();
-  let hour = datetime.getUTCHours();
-  let minute = datetime.getUTCMinutes();
-  let second = datetime.getUTCSeconds();
+function getDateTimeId(time) {
+  const datetime = new Date(time);
+  const year = datetime.getUTCFullYear();
+  const month = datetime.getUTCMonth() + 1;
+  const date = datetime.getUTCDate();
+  const hour = datetime.getUTCHours();
+  const minute = datetime.getUTCMinutes();
+  const second = datetime.getUTCSeconds();
   return `${year}-${month}-${date}T${hour}:${minute}:${second}Z`;
 }
+
+const netSizes = result.map(r => r.netSize);
+// console.log('netSizes', netSizes);
+const q1 = ss.quantile(netSizes, 0.25);
+console.log('Q1', q1);
+const q3 = ss.quantile(netSizes, 0.75);
+console.log('Q3', q3);
+const iqr = ss.interquartileRange(netSizes);
+console.log('IQR', iqr);
+const mean = ss.mean(netSizes);
+console.log('mean', mean);
+const mode = ss.mode(netSizes);
+console.log('mode', mode);
+const median = ss.median(netSizes);
+console.log('median', median);
+const std = ss.standardDeviation(netSizes);
+console.log('Standard Deviation', std);
+
+const K1 = 1.5;
+const K2 = 3;
+let lower2 = q1 - K2 * iqr;
+let lower1 = q1 - K1 * iqr;
+let upper1 = q3 + K1 * iqr;
+let upper2 = q3 + K2 * iqr;
+console.log('Tukey Fences', lower2, lower1, upper1, upper2);
+
+result.forEach(trade => {
+  trade.zScore = ss.zScore(trade.netSize, mean, std);
+  if (trade.netSize < lower2) {
+    trade.warning = 'SELL SELL';
+  } else if (trade.netSize >= lower2 && trade.netSize <= lower1) {
+    trade.warning = 'SELL';
+  } else if (trade.netSize >= upper1 && trade.netSize <= upper2) {
+    trade.warning = 'BUY';
+  } else if (trade.netSize > upper2) {
+    trade.warning = 'BUY BUY';
+  }
+});
 
 function getQueueSum(size) {
   if (queue.length >= QUEUE_SIZE) {
