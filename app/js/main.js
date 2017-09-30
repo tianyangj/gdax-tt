@@ -45,6 +45,7 @@ const result = data.map(trade => {
     let node = {
       id: getDateTimeId(currentTime),
       warning: undefined,
+      zScore: 0,
       weight: 0,
       netSize: 0,
       startPrice: cur.price,
@@ -69,9 +70,36 @@ const result = data.map(trade => {
 }, []).map(trade => {
   return {
     ...trade,
-    warning: Math.abs(trade.netSize) >= TOKEN_SIZE ? true : undefined,
-    weight: getQueueSum(trade.netSize)
+    //warning: Math.abs(trade.netSize) >= TOKEN_SIZE ? true : undefined,
+    //weight: getQueueSum(trade.netSize)
   };
+});
+
+let netSizes = result.map(r => r.netSize);
+let q1 = ss.quantile(netSizes, 0.25);
+let q3 = ss.quantile(netSizes, 0.75);
+let iqr = ss.interquartileRange(netSizes);
+let mean = ss.mean(netSizes);
+let sd = ss.standardDeviation(netSizes);
+console.log(q1, q3, iqr, mean, sd);
+let K = 1.5;
+let lower = q1 - iqr * K;
+let lower2 = q1 - iqr * K * 2;
+let higher = q3 + iqr * K;
+let higher2 = q3 + iqr * K * 2;
+console.log(lower2, lower, higher, higher2);
+
+result.forEach(trade => {
+  if (trade.netSize <= lower2) {
+    trade.warning = 'SELL SELL';
+  } else if (trade.netSize > lower2 && trade.netSize <= lower) {
+    trade.warning = 'SELL';
+  } else if (trade.netSize >= higher && trade.netSize < higher2) {
+    trade.warning = 'BUY';
+  } else if (trade.netSize >= higher2) {
+    trade.warning = 'BUY BUY';
+  }
+  trade.zScore = ss.zScore(trade.netSize, mean, sd);
 });
 
 function getDateTimeId(datetime) {

@@ -2075,6 +2075,10 @@ simple-mock@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/simple-mock/-/simple-mock-0.8.0.tgz#49c9a223fa6eea8e2c4fd6948fe8300cd8a594f3"
 
+simple-statistics@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/simple-statistics/-/simple-statistics-5.0.0.tgz#6ac9511fbe5d1283e1c77fabda0258fa6679c1b0"
+
 slide@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
