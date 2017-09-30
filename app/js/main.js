@@ -1,18 +1,10 @@
 const data = window.data;
-const TOKEN_SIZE = 10;
 const QUEUE_SIZE = 10;
 
-let total = 0;
 let queue = [];
 const result = data
   .map(normalizeData)
-  .reduce(groupBySecond, [])
-  .map(trade => {
-    return {
-      ...trade,
-      //warning: Math.abs(trade.netSize) >= TOKEN_SIZE ? true : undefined,
-    };
-  });
+  .reduce(groupBySecond, []);
 
 function normalizeData(trade) {
   return {
@@ -41,11 +33,11 @@ function groupBySecond(groups, trade) {
   } else {
     group = {
       id: getDateTimeId(trade.time),
-      warning: undefined,
-      zScore: 0,
-      netSize: 0,
+      message: '',
       startPrice: trade.price,
       endPrice: trade.price,
+      netSize: 0,
+      zScore: 0,
       buyTotal: 0,
       buySize: 0,
       sellTotal: 0,
@@ -101,18 +93,49 @@ let upper1 = q3 + K1 * iqr;
 let upper2 = q3 + K2 * iqr;
 console.log('Tukey Fences', lower2, lower1, upper1, upper2);
 
-result.forEach(trade => {
-  trade.zScore = ss.zScore(trade.netSize, mean, std);
-  if (trade.netSize < lower2) {
-    trade.warning = 'SELL SELL';
-  } else if (trade.netSize >= lower2 && trade.netSize <= lower1) {
-    trade.warning = 'SELL';
-  } else if (trade.netSize >= upper1 && trade.netSize <= upper2) {
-    trade.warning = 'BUY';
-  } else if (trade.netSize > upper2) {
-    trade.warning = 'BUY BUY';
+function applyIQR1(result) {
+  result.forEach(trade => {
+    if (trade.netSize < lower1) {
+      trade.message += 'SELL';
+    } else if (trade.netSize > upper1) {
+      trade.message += 'BUY';
+    }
+  });
+}
+
+function applyIQR2(result) {
+  result.forEach(trade => {
+    if (trade.netSize < lower2) {
+      trade.message += 'SELL';
+    } else if (trade.netSize > upper2) {
+      trade.message += 'BUY';
+    }
+  });
+}
+
+function applyIQR(result) {
+  result.forEach(trade => {
+    if (trade.netSize < lower2) {
+      trade.message += 'SELL SELL';
+    } else if (trade.netSize >= lower2 && trade.netSize <= lower1) {
+      trade.message += 'SELL';
+    } else if (trade.netSize >= upper1 && trade.netSize <= upper2) {
+      trade.message += 'BUY';
+    } else if (trade.netSize > upper2) {
+      trade.message += 'BUY BUY';
+    }
+  });
+}
+
+function applyZScore(result, zScore) {
+  if (trade.zScore > zScore) {
+    trade.message += 'BUY';
+  } else if (trade.zScore < -zScore) {
+    trade.message += 'SELL';
   }
-});
+}
+
+applyIQR(result);
 
 function getQueueSum(size) {
   if (queue.length >= QUEUE_SIZE) {
@@ -122,6 +145,5 @@ function getQueueSum(size) {
   return queue.reduce((acc, cur) => acc + cur, 0);
 }
 
-console.log('total', total);
 console.log('result', result);
 //console.log('json', JSON.stringify(result));
