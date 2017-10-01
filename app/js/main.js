@@ -1,8 +1,4 @@
 const data = window.data;
-const QUEUE_SIZE = 10;
-const K = 1.5;
-
-let queue = [];
 
 function normalizeData(items) {
   return items.map(item => {
@@ -70,7 +66,7 @@ function groupBySecond(items) {
   }, []);
 }
 
-function applyIQR(items, filter) {
+function applyIQR(items, K, filter) {
   const netSizes = items.map(item => item.netSize);
   // console.log('netSizes', netSizes);
   const q1 = ss.quantile(netSizes, 0.25);
@@ -120,19 +116,53 @@ function applyZScore(items) {
   });
 }
 
+function groupByMinute(items) {
+  function getDateTimeId(time) {
+    const datetime = new Date(time);
+    const year = datetime.getUTCFullYear();
+    const month = datetime.getUTCMonth() + 1;
+    const date = datetime.getUTCDate();
+    const hour = datetime.getUTCHours();
+    const minute = datetime.getUTCMinutes();
+    return `${year}-${month}-${date}T${hour}:${minute}Z`;
+  }
+  return items.reduce((accumulator, current) => {
+    const id = getDateTimeId(current.time);
+    let node = accumulator.find(t => t.id === id);
+    if (node) {
+      node.endPrice = current.endPrice;
+      node.netSize += current.netSize;
+      node.buyTotal += current.buyTotal;
+      node.buySize += current.buySize;
+      node.sellTotal += current.sellTotal;
+      node.sellSize += current.sellSize;
+      node.groups.push(current);
+    } else {
+      node = {
+        id: id,
+        message: '',
+        startPrice: current.startPrice,
+        endPrice: current.endPrice,
+        netSize: current.netSize,
+        buyTotal: current.buyTotal,
+        buySize: current.buySize,
+        sellTotal: current.sellTotal,
+        sellSize: current.sellSize,
+        time: current.time,
+        groups: [current]
+      };
+      accumulator.push(node);
+    }
+    return accumulator;
+  }, []);
+}
+
 let result = [];
 result = normalizeData(data);
 result = groupBySecond(result);
-result = applyIQR(result, true);
+result = applyIQR(result, 1.5, true);
 //result = applyZScore(result);
-
-function getQueueSum(size) {
-  if (queue.length >= QUEUE_SIZE) {
-    queue.shift();
-  }
-  queue.push(size);
-  return queue.reduce((acc, cur) => acc + cur, 0);
-}
+result = groupByMinute(result);
+result = applyIQR(result, 1.5, true);
 
 console.log('result', result);
-//console.log('json', JSON.stringify(result));
