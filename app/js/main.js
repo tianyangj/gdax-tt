@@ -13,25 +13,20 @@ function normalizeData(items) {
 }
 
 function groupBySecond(items) {
-  function getDateTimeId(time) {
-    const datetime = new Date(time);
-    const year = datetime.getUTCFullYear();
-    const month = datetime.getUTCMonth() + 1;
-    const date = datetime.getUTCDate();
-    const hour = datetime.getUTCHours();
-    const minute = datetime.getUTCMinutes();
-    const second = datetime.getUTCSeconds();
-    return `${year}-${month}-${date}T${hour}:${minute}:${second}Z`;
+  function getDateTime(time) {
+    let datetime = new Date(time);
+    datetime.setUTCMilliseconds(0);
+    return datetime.toISOString();
   }
   return items.reduce((groups, trade) => {
-    const id = getDateTimeId(trade.time);
-    let group = groups.find(g => g.id === id);
+    const time = getDateTime(trade.time);
+    let group = groups.find(g => g.time === time);
     if (group) {
       if (trade.side === 'buy') {
-        group.buyTotal++;
+        group.buyCount++;
         group.buySize += trade.size;
       } else if (trade.side === 'sell') {
-        group.sellTotal++;
+        group.sellCount++;
         group.sellSize += trade.size;
       }
       group.netSize = group.buySize - group.sellSize;
@@ -39,24 +34,22 @@ function groupBySecond(items) {
       group.trades.push(trade);
     } else {
       group = {
-        id: id,
-        message: '',
+        time: time,
+        side: '',
         startPrice: trade.price,
         endPrice: trade.price,
         netSize: 0,
-        zScore: 0,
-        buyTotal: 0,
+        buyCount: 0,
         buySize: 0,
-        sellTotal: 0,
+        sellCount: 0,
         sellSize: 0,
-        time: trade.time,
         trades: [trade]
       };
       if (trade.side === 'buy') {
-        group.buyTotal++;
+        group.buyCount++;
         group.buySize += trade.size;
       } else if (trade.side === 'sell') {
-        group.sellTotal++;
+        group.sellCount++;
         group.sellSize += trade.size;
       }
       group.netSize = group.buySize - group.sellSize;
@@ -79,19 +72,19 @@ function applyIQR(items, K, filter) {
   const upper = q3 + K * iqr;
   console.log(`Tukey Fences [${lower}, ${upper}]`);
   let result = items.map(trade => {
-    let message;
+    let side;
     if (trade.netSize < lower) {
-      message = 'SELL';
+      side = 'sell';
     } else if (trade.netSize > upper) {
-      message = 'BUY';
+      side = 'buy';
     }
     return {
       ...trade,
-      message: message
+      side: side
     };
   });
   if (filter) {
-    return result.filter(t => !!t.message);
+    return result.filter(t => !!t.side);
   } else {
     return result;
   }
@@ -117,38 +110,34 @@ function applyZScore(items) {
 }
 
 function groupByMinute(items) {
-  function getDateTimeId(time) {
-    const datetime = new Date(time);
-    const year = datetime.getUTCFullYear();
-    const month = datetime.getUTCMonth() + 1;
-    const date = datetime.getUTCDate();
-    const hour = datetime.getUTCHours();
-    const minute = datetime.getUTCMinutes();
-    return `${year}-${month}-${date}T${hour}:${minute}Z`;
+  function getDateTime(time) {
+    let datetime = new Date(time);
+    datetime.setUTCSeconds(0);
+    datetime.setUTCMilliseconds(0);
+    return datetime.toISOString();
   }
   return items.reduce((accumulator, current) => {
-    const id = getDateTimeId(current.time);
-    let node = accumulator.find(t => t.id === id);
+    const time = getDateTime(current.time);
+    let node = accumulator.find(t => t.time === time);
     if (node) {
       node.endPrice = current.endPrice;
       node.netSize += current.netSize;
-      node.buyTotal += current.buyTotal;
+      node.buyCount += current.buyCount;
       node.buySize += current.buySize;
-      node.sellTotal += current.sellTotal;
+      node.sellCount += current.sellCount;
       node.sellSize += current.sellSize;
       node.groups.push(current);
     } else {
       node = {
-        id: id,
-        message: '',
+        time: time,
+        side: '',
         startPrice: current.startPrice,
         endPrice: current.endPrice,
         netSize: current.netSize,
-        buyTotal: current.buyTotal,
+        buyCount: current.buyCount,
         buySize: current.buySize,
-        sellTotal: current.sellTotal,
+        sellCount: current.sellCount,
         sellSize: current.sellSize,
-        time: current.time,
         groups: [current]
       };
       accumulator.push(node);
