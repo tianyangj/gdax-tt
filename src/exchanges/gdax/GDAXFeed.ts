@@ -16,6 +16,7 @@ import { AuthHeaders, GDAXAuthConfig, GDAXExchangeAPI } from './GDAXExchangeAPI'
 import { Big } from '../../lib/types';
 import {
     ChangedOrderMessage,
+    ErrorMessage,
     LevelMessage,
     MyOrderPlacedMessage,
     NewOrderMessage,
@@ -30,13 +31,16 @@ import {
 } from '../../core/Messages';
 import { OrderPool } from '../../lib/BookBuilder';
 import {
-    GDAXChangeMessage, GDAXChannel,
+    GDAXChangeMessage,
+    GDAXChannel,
     GDAXDoneMessage,
+    GDAXErrorMessage,
     GDAXL2UpdateMessage,
     GDAXMatchMessage,
     GDAXMessage,
     GDAXOpenMessage,
-    GDAXSnapshotMessage, GDAXSubscriptionsMessage,
+    GDAXSnapshotMessage,
+    GDAXSubscriptionsMessage,
     GDAXTickerMessage
 } from './GDAXMessages';
 import { AuthenticatedExchangeAPI } from '../AuthenticatedExchangeAPI';
@@ -69,7 +73,8 @@ export interface GDAXFeedConfig extends ExchangeFeedConfig {
  * The GDAX message feed. Messages are created via a combination of WS and REST calls, which are then sent down the pipe.
  * It handles automatically reconnects on errors and tracks the connection by monitoring a heartbeat.
  * You can create the feeds from here, but it's preferable to use the `getFeed` or `FeedFactory` functions to get a
- * connection from the pool
+ * connection from the pool.
+ * Error messages from the Websocket feed are passed down the stream and also emitted as 'feederror' events.
  */
 export class GDAXFeed extends ExchangeFeed {
     private products: Set<string>;
@@ -147,7 +152,7 @@ export class GDAXFeed extends ExchangeFeed {
     }
 
     protected validateAuth(auth: ExchangeAuthConfig): ExchangeAuthConfig {
-        auth  = super.validateAuth(auth);
+        auth = super.validateAuth(auth);
         return auth && (auth as GDAXAuthConfig).passphrase ? auth : undefined;
     }
 
@@ -374,12 +379,31 @@ export class GDAXFeed extends ExchangeFeed {
                     price: change.price,
                     newSize: change.new_size
                 } as ChangedOrderMessage;
-            default:
+            case 'error':
+                const error: GDAXErrorMessage = feedMessage as GDAXErrorMessage;
+                const msg: ErrorMessage = {
+                    type: 'error',
+                    time: new Date(),
+                    message: error.message,
+                    details: { reason: error.reason }
+                } as ErrorMessage;
+                this.emit('feed-error', msg);
+                return msg;
+            case 'received':
                 return {
                     type: 'unknown',
                     time: new Date(),
                     sequence: (feedMessage as any).sequence,
-                    productId: feedMessage.product_id,
+                    productId: (feedMessage as any).product_id,
+                    message: feedMessage
+                } as UnknownMessage;
+            default:
+                const product: string = (feedMessage as any).product_id;
+                return {
+                    type: 'unknown',
+                    time: new Date(),
+                    sequence: this.getSequence(product),
+                    productId: product,
                     message: feedMessage
                 } as UnknownMessage;
         }
@@ -433,7 +457,7 @@ export class GDAXFeed extends ExchangeFeed {
                     reason: (feedMessage as GDAXDoneMessage).reason,
                     side: (feedMessage as GDAXDoneMessage).side,
                     filledSize: (feedMessage as GDAXMatchMessage).size,
-                    remainingSize: (feedMessage as GDAXDoneMessage).remaining_size,
+                    remainingSize: (feedMessage as GDAXDoneMessage).remaining_size
                 } as TradeFinalizedMessage;
             case 'open':
                 return {
