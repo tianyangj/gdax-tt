@@ -30,7 +30,7 @@ MongoClient.connect(uri, (err, db) => {
 
         book.on('LiveOrderbook.trade', (trade: TradeMessage) => {
             const state = book.state();
-            let temp = {
+            let temp: any = {
                 ...trade,
                 orderbook: {
                     bids: [],
@@ -49,6 +49,14 @@ MongoClient.connect(uri, (err, db) => {
                     size: ask.totalSize.toString()
                 };
             });
+            let buyOrders = book.ordersForValue('buy', 1000, false);
+            let buyOrder = buyOrders[buyOrders.length - 1];
+            let sellOrders = book.ordersForValue('sell', 1000, false);
+            let sellOrder = sellOrders[sellOrders.length - 1];
+            temp.buy = Number(buyOrder.cumValue.toFixed(2))/1000;
+            temp.buyDiff = Math.abs(temp.buy - Number(temp.price));
+            temp.sell = Number(sellOrder.cumValue.toFixed(2))/1000;
+            temp.sellDiff = Math.abs(temp.sell - Number(temp.price));
             orderbookCollection.insertMany([temp], () => { });
         });
         feed.pipe(book);
