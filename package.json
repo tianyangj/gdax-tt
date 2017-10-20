@@ -1,6 +1,6 @@
 {
   "name": "gdax-trading-toolkit",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "A trading toolkit for building advanced trading bots on the GDAX platform",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
@@ -75,7 +75,7 @@
     "ts-node": "^3.3.0",
     "tslint": "5.6.0",
     "typedoc": "0.8.0",
-    "typescript": "2.4.1",
+    "typescript": "^2.5.3",
     "uuid": "3.0.0"
   }
 }

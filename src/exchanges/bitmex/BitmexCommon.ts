@@ -11,33 +11,4 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the                      *
  * License for the specific language governing permissions and limitations under the License.                              *
  ***************************************************************************************************************************/
-
-import { Transform } from 'stream';
-import { RateLimiter as Limiter } from 'limiter';
-import { StreamMessage } from './Messages';
-
-/**
- * A simple transform stream that passes messages through at a specified rate. The timestamp is updated to reflect when
- * the message was actually sent
- */
-export default class RateLimiter extends Transform {
-    private limiter: any;
-
-    /**
-     * Limit outgoing message to `limit` per `interval`
-     * @param limit The number of messages released per interval
-     * @param interval The length of an interval in ms
-     */
-    constructor(limit: number, interval: number) {
-        super({ readableObjectMode: true, writableObjectMode: true, highWaterMark: 4196 });
-        this.limiter = new Limiter(limit, interval, false);
-    }
-
-    _transform(msg: StreamMessage, encoding: string, callback: (err?: Error, data?: any) => void): void {
-        this.limiter.removeTokens(1, () => {
-            msg.time = new Date();
-            this.push(msg);
-            callback();
-        });
-    }
-}
+export const BITMEX_WS_FEED = 'wss://www.bitmex.com/realtime/';

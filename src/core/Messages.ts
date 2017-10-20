@@ -18,11 +18,14 @@ import { Ticker } from '../exchanges/PublicExchangeAPI';
  * Interfaces for the GTT Stream message types. These messages are generated and passed on my the GTT streaming
  * infrastructure. The `type` field is conventionally named after the interface, first letter lowercased,  with the word Message
  * stripped out, so e.g. HeartbeatMessage => heartbeat and NewOrderMessage => newOrder
+ *
+ * The origin field, if present represents the original unmodified message that was mapped (e.g. original trade message from exchange)
  */
 
 export interface StreamMessage {
     type: string;
     time: Date;
+    origin?: any;
 }
 
 export function isStreamMessage(msg: any): boolean {
@@ -30,6 +33,7 @@ export function isStreamMessage(msg: any): boolean {
 }
 
 export interface ErrorMessage extends StreamMessage {
+    type: 'error';
     message: string;
     details?: any;
 }
@@ -38,10 +42,16 @@ export function isErrorMessage(msg: any): boolean {
     return isStreamMessage(msg) && !!msg.message && typeof msg.message === 'string';
 }
 
+/**
+ * Interface for any message type not supported explicitly elsewhere.
+ * The type must always be 'unknown'. If the source of the message is actually known, (e.g. trollbox chats), this can be indicated in the `tag` field.
+ * Any context-rich information can be extracted into the `extra` field, and the original message should be attached to the `origin` field as usual.
+ */
 export interface UnknownMessage extends StreamMessage {
     sequence?: number;
     productId?: string;
-    message: any;
+    tag?: string;
+    extra?: any;
 }
 
 export function isUnknownMessage(msg: any): boolean {
@@ -82,6 +92,7 @@ export function isOrderMessage(msg: any): boolean {
  * `orderType` is market, limit, stop
  */
 export interface NewOrderMessage extends BaseOrderMessage {
+    type: 'newOrder';
     size: string;
 }
 
@@ -90,6 +101,7 @@ export interface NewOrderMessage extends BaseOrderMessage {
  * was left unfilled if it was cancelled
  */
 export interface OrderDoneMessage extends BaseOrderMessage {
+    type: 'orderDone';
     reason: string;
     remainingSize: string;
 }
@@ -99,6 +111,7 @@ export interface OrderDoneMessage extends BaseOrderMessage {
  * or changedAmount (which adds to the old value) must be specified.
  */
 export interface ChangedOrderMessage extends BaseOrderMessage {
+    type: 'changedOrder';
     newSize?: string;
     changedAmount?: string;
 }
@@ -110,6 +123,7 @@ export interface ChangedOrderMessage extends BaseOrderMessage {
  * replace the old one.
  */
 export interface LevelMessage extends OrderbookMessage {
+    type: 'level';
     price: string;
     size: string;
     count: number;
@@ -120,6 +134,7 @@ export interface LevelMessage extends OrderbookMessage {
  * sequence field. A corresponding `level`, `done`, or 'change` message will also be sent.
  */
 export interface TradeMessage extends StreamMessage {
+    type: 'trade';
     productId: string;
     side: string;
     tradeId: string;
@@ -128,10 +143,12 @@ export interface TradeMessage extends StreamMessage {
 }
 
 export interface SnapshotMessage extends StreamMessage, OrderbookState {
+    type: 'snapshot';
     productId: string;
 }
 
 export interface TickerMessage extends StreamMessage, Ticker {
+    type: 'ticker';
     productId: string;
 }
 
@@ -175,6 +192,7 @@ export interface TradeFinalizedMessage extends StreamMessage {
     productId: string;
     orderId: string;
     side: string;
+    price: string;
     remainingSize: string;
     reason: string;
 }
